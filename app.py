@@ -62,6 +62,9 @@ def categorize_mood(valence):
 if 'mood' not in df.columns:
     df['mood'] = df['valence'].apply(categorize_mood)
 
+# Prepare song list for auto-suggestions
+song_list = df['track_name'].dropna().unique().tolist()
+
 # ---------------- Streamlit UI ----------------
 st.title("🎧 Spotify Recommendation System (Optimized + SHAP)")
 
@@ -78,7 +81,7 @@ menu = st.sidebar.selectbox("Choose a Feature", [
 # --- Content-Based ---
 if menu == "Content-Based Recommendation":
     st.header("🎯 Content-Based Recommendation (Fast)")
-    song_input = st.text_input("Enter a song name (any case):", "Hold On")
+    song_input = st.selectbox("🎵 Choose a song:", options=song_list, index=0)
     num = st.slider("Number of recommendations", 1, 20, 5)
     if st.button("Recommend"):
         rec_engine = SpotifyRecommendation(df, cosine_sim)
@@ -93,7 +96,7 @@ if menu == "Content-Based Recommendation":
 # --- Cluster-Based ---
 elif menu == "Cluster-Based Recommendation":
     st.header("🧠 Cluster-Based Recommendation")
-    song_input = st.text_input("Enter song for cluster recs:", "Hold On")
+    song_input = st.selectbox("🎵 Choose a song for cluster recommendations:", options=song_list, index=0)
     num = st.slider("Number of recommendations", 1, 20, 5)
     if st.button("Recommend Cluster"):
         results = get_cluster_recommendations(song_input, df, amount=num)
